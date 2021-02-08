@@ -105,7 +105,20 @@
       :time time-encoder
       :offset-date-time time-encoder
       :zoned-date-time time-encoder
-      :instant time-encoder}
+      :instant {:compile
+                (fn [schema _]
+                  (let [default (get default-format (m/type schema))
+                        {:keys [malli/format]
+                         :or {format default}} (m/properties schema)
+                        formatter (if (formatter? format)
+                                    format
+                                    (t/formatter format))]
+                    {:enter (fn [obj]
+                              (if (m/validate schema obj)
+                                (if (= format :iso-instant)
+                                  (t/format formatter obj)
+                                  (t/format formatter (t/zoned-date-time obj)))
+                                obj))}))}}
      :decoders
      {:year time-decoder
       :year-month time-decoder
