@@ -1,0 +1,23 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.10.2"}
+        metosin/malli {:git/url "https://github.com/metosin/malli.git"
+                       :sha "c97967996cd6ddb5a587a34a96e53dd76f9509ac"}
+        tick/tick {:mvn/version "0.4.30-alpha"}}
+ :aliases
+ {:dev {:extra-paths ["dev/src" "test" "dev/resources"]
+        :extra-deps {tick/tick {:mvn/version "0.4.30-alpha"}
+                     clojure.java-time/clojure.java-time {:mvn/version "0.3.2"}
+                     lambdaisland/kaocha {:mvn/version "1.0.732"}}}
+  :test {:extra-paths ["dev/src" "test" "dev/resources"]
+         :extra-deps {tick/tick {:mvn/version "0.4.30-alpha"}
+                      clojure.java-time/clojure.java-time {:mvn/version "0.3.2"}
+                      lambdaisland/kaocha {:mvn/version "1.0.732"}}}
+  :jar {:replace-deps {seancorfield/depstar {:mvn/version "2.0.171"}}
+        :exec-fn hf.depstar/jar
+        :exec-args {:jar "malli-tools.jar" :sync-pom true}}
+  :install {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
+            :exec-fn deps-deploy.deps-deploy/deploy
+            :exec-args {:installer :local :artifact "malli-tools.jar"}}
+  :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
+           :exec-fn deps-deploy.deps-deploy/deploy
+           :exec-args {:installer :remote :artifact "malli-tools.jar"}}}}
