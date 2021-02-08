@@ -6,7 +6,7 @@
             [caesarhu.malli-tools.time :refer :all]
             [java-time :as jt])
   (:import (clojure.lang ExceptionInfo)
-           (java.util Date)
+           (java.util Date Locale)
            (java.time LocalTime LocalDateTime OffsetDateTime ZonedDateTime YearMonth Year Instant LocalDate OffsetTime Clock ZoneId)
            (java.time.format DateTimeFormatter)))
 
@@ -59,24 +59,15 @@
         ;instant (jt/instant clock)
         date (jt/local-date clock)
         year-month (jt/year-month clock)
-        year (jt/year clock)))))
-
-(deftest malli-time-test
-  (testing "testing caesarhu.malli-tools.time"
-    (is (= "2000"
-           (m/encode year (t/year 2000) time-transformer)))
-    (is (= (t/year 2000)
-           (m/decode year
-                     (m/encode year (t/year 2000) time-transformer)
-                     time-transformer)))
-    (is (= "2000-02"
-           (m/encode year-month (t/year-month "2000-02") time-transformer)))
-    (is (= (t/year-month "2000-02")
-           (m/decode year-month "2000-02" time-transformer)))
-    (is (= "2000-02-08"
-           (m/encode date (jt/local-date 2000 2 8) time-transformer)))
-    (is (= (jt/local-date 2000 2 8)
-           (m/decode date "2000-02-08" time-transformer)))
-    (is (= "2021-02-08T17:50:22.357792"
-           (m/encode date-time (t/date-time "2021-02-08T17:50:22.357792") time-transformer)))
-    (is ())))
+        year (jt/year clock)))
+    (testing "decodes the objects"
+      (are [value schema expected]
+        (= expected (m/decode schema value time-transformer))
+        "20:15:16.178" time (jt/local-time clock)
+        "1999-12-13T20:15:16.178" date-time (jt/local-date-time clock)
+        "1999-12-13T20:15:16.178+06:00" offset-date-time (jt/offset-date-time clock)
+        "1999-12-13T20:15:16.178+06:00[GMT+06:00]" zoned-date-time (jt/zoned-date-time clock)
+        "1999-12-13" date (jt/local-date clock)
+        "1999-12" year-month (jt/year-month clock)
+        "1999" year (jt/year clock)
+        "1999-12-13T14:15:16.178Z" instant (jt/instant clock)))))
