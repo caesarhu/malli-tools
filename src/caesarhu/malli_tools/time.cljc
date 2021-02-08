@@ -2,65 +2,66 @@
   (:refer-clojure :exclude [time])
   (:require [malli.core :as m]
             [malli.transform :as mt]
-            [tick.alpha.api :as t]
-            [tick.core :as tc])
+            [tick.alpha.api :as t])
   (:import (java.time Instant OffsetDateTime LocalDateTime ZonedDateTime LocalDate OffsetTime LocalTime YearMonth Year ZoneId)
            (java.util Date Locale)
            (java.time.format DateTimeFormatter)))
 
-(def year (m/-simple-schema {:pred t/year? :type 'year}))
-(def year-month (m/-simple-schema {:pred t/year-month? :type 'year-month}))
-(def date (m/-simple-schema {:pred t/date? :type 'date}))
-(def date-time (m/-simple-schema {:pred t/date-time? :type 'date-time}))
-(def time (m/-simple-schema {:pred t/time? :type 'time}))
-(def offset-date-time (m/-simple-schema {:pred t/offset-date-time? :type 'offset-date-time}))
-(def zoned-date-time (m/-simple-schema {:pred t/zoned-date-time? :type 'zoned-date-time}))
-(def instant (m/-simple-schema {:pred t/instant? :type 'instant}))
+(def format-key :malli/format)
+
+(def year (m/-simple-schema {:pred t/year? :type :year}))
+(def year-month (m/-simple-schema {:pred t/year-month? :type :year-month}))
+(def date (m/-simple-schema {:pred t/date? :type :date}))
+(def date-time (m/-simple-schema {:pred t/date-time? :type :date-time}))
+(def time (m/-simple-schema {:pred t/time? :type :time}))
+(def offset-date-time (m/-simple-schema {:pred t/offset-date-time? :type :offset-date-time}))
+(def zoned-date-time (m/-simple-schema {:pred t/zoned-date-time? :type :zoned-date-time}))
+(def instant (m/-simple-schema {:pred t/instant? :type :instant}))
 
 (defn formatter?
   [x]
   (instance? DateTimeFormatter x))
 
 (def default-format
-  {'year "yyyy"
-   'year-month "yyyy-MM"
-   'date :iso-local-date
-   'date-time :iso-local-date-time
-   'time :iso-local-time
-   'offset-date-time :iso-offset-date-time
-   'zoned-date-time :iso-zoned-date-time
-   'instant :iso-instant})
+  {:year "yyyy"
+   :year-month "yyyy-MM"
+   :date :iso-local-date
+   :date-time :iso-local-date-time
+   :time :iso-local-time
+   :offset-date-time :iso-offset-date-time
+   :zoned-date-time :iso-zoned-date-time
+   :instant :iso-instant})
 
 (def parse-fn-table
-  {'year (fn [s formatter]
+  {:year (fn [s formatter]
            (if (formatter? formatter)
              (cljc.java-time.year/parse s formatter)
              (t/year s)))
-   'year-month (fn [s formatter]
+   :year-month (fn [s formatter]
                  (if (formatter? formatter)
                    (cljc.java-time.year-month/parse s formatter)
                    (t/year-month s)))
-   'date (fn [s formatter]
+   :date (fn [s formatter]
            (if (formatter? formatter)
              (cljc.java-time.local-date/parse s formatter)
              (t/date s)))
-   'date-time (fn [s formatter]
+   :date-time (fn [s formatter]
                 (if (formatter? formatter)
                   (cljc.java-time.local-date-time/parse s formatter)
                   (t/date-time s)))
-   'time (fn [s formatter]
+   :time (fn [s formatter]
            (if (formatter? formatter)
              (cljc.java-time.local-time/parse s formatter)
              (t/time s)))
-   'offset-date-time (fn [s formatter]
+   :offset-date-time (fn [s formatter]
                        (if (formatter? formatter)
                          (cljc.java-time.offset-date-time/parse s formatter)
                          (t/offset-date-time s)))
-   'zoned-date-time (fn [s formatter]
+   :zoned-date-time (fn [s formatter]
                       (if (formatter? formatter)
                         (cljc.java-time.zoned-date-time/parse s formatter)
                         (t/zoned-date-time s)))
-   'instant (fn [s _]
+   :instant (fn [s _]
               (t/instant s))})
 
 (def time-encoder
@@ -97,23 +98,23 @@
   []
   (mt/transformer
     {:encoders
-     {'year time-encoder
-      'year-month time-encoder
-      'date time-encoder
-      'date-time time-encoder
-      'time time-encoder
-      'offset-date-time time-encoder
-      'zoned-date-time time-encoder
-      'instant time-encoder}
+     {:year time-encoder
+      :year-month time-encoder
+      :date time-encoder
+      :date-time time-encoder
+      :time time-encoder
+      :offset-date-time time-encoder
+      :zoned-date-time time-encoder
+      :instant time-encoder}
      :decoders
-     {'year time-decoder
-      'year-month time-decoder
-      'date time-decoder
-      'date-time time-decoder
-      'time time-decoder
-      'offset-date-time time-decoder
-      'zoned-date-time time-decoder
-      'instant time-decoder}}))
+     {:year time-decoder
+      :year-month time-decoder
+      :date time-decoder
+      :date-time time-decoder
+      :time time-decoder
+      :offset-date-time time-decoder
+      :zoned-date-time time-decoder
+      :instant time-decoder}}))
 
 (def time-schemas
   {:date date,
