@@ -4,14 +4,20 @@
                        :sha "c97967996cd6ddb5a587a34a96e53dd76f9509ac"}
         tick/tick {:mvn/version "0.4.30-alpha"}}
  :aliases
- {:dev {:extra-paths ["dev/src" "test" "dev/resources"]
-        :extra-deps {tick/tick {:mvn/version "0.4.30-alpha"}
-                     clojure.java-time/clojure.java-time {:mvn/version "0.3.2"}
-                     lambdaisland/kaocha {:mvn/version "1.0.732"}}}
-  :test {:extra-paths ["dev/src" "test" "dev/resources"]
-         :extra-deps {tick/tick {:mvn/version "0.4.30-alpha"}
-                      clojure.java-time/clojure.java-time {:mvn/version "0.3.2"}
-                      lambdaisland/kaocha {:mvn/version "1.0.732"}}}
+ {:dev {:extra-paths ["dev/src" "test"]
+        :extra-deps {clojure.java-time/clojure.java-time {:mvn/version "0.3.2"}
+                     lambdaisland/kaocha {:mvn/version "1.0.732"}
+                     com.bhauman/figwheel-main          {:mvn/version "0.2.12"}
+                     cider/piggieback                   {:mvn/version "0.5.2"}
+                     com.bhauman/cljs-test-display      {:mvn/version "0.1.1"}
+                     org.clojure/clojurescript          {:mvn/version "1.10.773"}}}
+  :test-clj {:extra-paths ["test"]
+             :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}
+             :main-opts ["-m" "kaocha.runner"]}
+  :test-chrome {:extra-paths ["test" "cljs-test-runner-out/gen"]
+                :extra-deps  {olical/cljs-test-runner   {:mvn/version "3.8.0" :exclusions [org.clojure/clojurescript]}
+                              org.clojure/clojurescript {:mvn/version "1.10.773"}}
+                :main-opts   ["-m" "cljs-test-runner.main" "-c" "test/cljs-test-opts.edn -x chrome-headless"]}
   :jar {:replace-deps {seancorfield/depstar {:mvn/version "2.0.171"}}
         :exec-fn hf.depstar/jar
         :exec-args {:jar "malli-tools.jar" :sync-pom true}}
