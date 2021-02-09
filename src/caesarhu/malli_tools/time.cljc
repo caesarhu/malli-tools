@@ -10,15 +10,6 @@
 
 (def format-key :malli/format)
 
-(def year (m/-simple-schema {:pred t/year? :type :year}))
-(def year-month (m/-simple-schema {:pred t/year-month? :type :year-month}))
-(def date (m/-simple-schema {:pred t/date? :type :date}))
-(def date-time (m/-simple-schema {:pred t/date-time? :type :date-time}))
-(def time (m/-simple-schema {:pred t/time? :type :time}))
-(def offset-date-time (m/-simple-schema {:pred t/offset-date-time? :type :offset-date-time}))
-(def zoned-date-time (m/-simple-schema {:pred t/zoned-date-time? :type :zoned-date-time}))
-(def instant (m/-simple-schema {:pred t/instant? :type :instant}))
-
 (defn formatter?
   [x]
   (instance? DateTimeFormatter x))
@@ -129,6 +120,26 @@
       :offset-date-time time-decoder
       :zoned-date-time time-decoder
       :instant time-decoder}}))
+
+(defn ->time-schema
+  [v pred]
+  (let [v-type (keyword (name v))]
+    (m/-simple-schema
+      {:pred pred
+       :type v-type
+       :type-properties {:encode/string #(str %)
+                         :decode/string #((get parse-fn-table v-type) % nil)
+                         :encode/json #(str %)
+                         :decode/json #((get parse-fn-table v-type) % nil)}})))
+
+(def year (->time-schema 'year t/year?))
+(def year-month (->time-schema 'year-month t/year-month?))
+(def date (->time-schema 'date t/date?))
+(def date-time (->time-schema 'date-time t/date-time?))
+(def time (->time-schema 'time t/time?))
+(def offset-date-time (->time-schema 'offset-date-time t/offset-date-time?))
+(def zoned-date-time (->time-schema 'zoned-date-time t/zoned-date-time?))
+(def instant (->time-schema 'instant t/instant?))
 
 (def time-schemas
   {:date date,

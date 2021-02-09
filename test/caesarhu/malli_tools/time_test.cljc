@@ -9,7 +9,8 @@
     [malli.core :as m]
     [caesarhu.malli-tools.time :refer
      [date time date-time offset-date-time zoned-date-time year-month
-      year instant time-transformer format-key]]))
+      year instant time-transformer format-key]]
+    [malli.transform :as mt]))
 
 (deftest construction-test
   (testing "Valid schemas are constructed"
@@ -73,3 +74,55 @@
            "1999-12" year-month (t/year-month (t/date zoned-clock))
            "1999" year (t/year zoned-clock)
            "1999-12-13T14:15:16.178Z" instant (t/instant zoned-clock)))))
+
+(deftest string-transformer-test
+  (let [clock (t/instant "1999-12-13T14:15:16.178Z")
+        zoned-clock (t/in clock "GMT+6")]
+    (testing "encode objects mt/string-transformer"
+      (are [expected schema value]
+        (= expected (m/encode schema value mt/string-transformer))
+        "20:15:16.178" time (t/time zoned-clock)
+        "1999-12-13T20:15:16.178" date-time (t/date-time zoned-clock)
+        "1999-12-13T20:15:16.178+06:00" offset-date-time (t/offset-date-time zoned-clock)
+        "1999-12-13T20:15:16.178+06:00[GMT+06:00]" zoned-date-time zoned-clock
+        "1999-12-13" date (t/date zoned-clock)
+        "1999-12" year-month (-> zoned-clock t/date t/year-month)
+        "1999" year (t/year zoned-clock)
+        "1999-12-13T14:15:16.178Z" instant clock))
+    (testing "encode objects mt/string-transformer"
+      (are [value schema expected]
+        (= expected (m/decode schema value mt/string-transformer))
+        "20:15:16.178" time (t/time zoned-clock)
+        "1999-12-13T20:15:16.178" date-time (t/date-time zoned-clock)
+        "1999-12-13T20:15:16.178+06:00" offset-date-time (t/offset-date-time zoned-clock)
+        "1999-12-13T20:15:16.178+06:00[GMT+06:00]" zoned-date-time zoned-clock
+        "1999-12-13" date (t/date zoned-clock)
+        "1999-12" year-month (t/year-month (t/date zoned-clock))
+        "1999" year (t/year zoned-clock)
+        "1999-12-13T14:15:16.178Z" instant (t/instant zoned-clock)))))
+
+(deftest json-transformer-test
+  (let [clock (t/instant "1999-12-13T14:15:16.178Z")
+        zoned-clock (t/in clock "GMT+6")]
+    (testing "encode objects mt/string-transformer"
+      (are [expected schema value]
+        (= expected (m/encode schema value mt/json-transformer))
+        "20:15:16.178" time (t/time zoned-clock)
+        "1999-12-13T20:15:16.178" date-time (t/date-time zoned-clock)
+        "1999-12-13T20:15:16.178+06:00" offset-date-time (t/offset-date-time zoned-clock)
+        "1999-12-13T20:15:16.178+06:00[GMT+06:00]" zoned-date-time zoned-clock
+        "1999-12-13" date (t/date zoned-clock)
+        "1999-12" year-month (-> zoned-clock t/date t/year-month)
+        "1999" year (t/year zoned-clock)
+        "1999-12-13T14:15:16.178Z" instant clock))
+    (testing "encode objects mt/string-transformer"
+      (are [value schema expected]
+        (= expected (m/decode schema value mt/json-transformer))
+        "20:15:16.178" time (t/time zoned-clock)
+        "1999-12-13T20:15:16.178" date-time (t/date-time zoned-clock)
+        "1999-12-13T20:15:16.178+06:00" offset-date-time (t/offset-date-time zoned-clock)
+        "1999-12-13T20:15:16.178+06:00[GMT+06:00]" zoned-date-time zoned-clock
+        "1999-12-13" date (t/date zoned-clock)
+        "1999-12" year-month (t/year-month (t/date zoned-clock))
+        "1999" year (t/year zoned-clock)
+        "1999-12-13T14:15:16.178Z" instant (t/instant zoned-clock)))))
