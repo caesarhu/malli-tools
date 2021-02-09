@@ -10,7 +10,10 @@
     [caesarhu.malli-tools.time :refer
      [date time date-time offset-date-time zoned-date-time year-month
       year instant time-transformer format-key]]
-    [malli.transform :as mt]))
+    [malli.transform :as mt])
+  #?(:clj
+     (:import [java.time.format DateTimeFormatter]
+              [java.util Locale])))
 
 (deftest construction-test
   (testing "Valid schemas are constructed"

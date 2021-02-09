@@ -24,6 +24,16 @@
    :zoned-date-time :iso-zoned-date-time
    :instant :iso-instant})
 
+(def pred-table
+  {:year t/year?
+   :year-month t/year-month?
+   :date t/date?
+   :date-time t/date-time?
+   :time t/time?
+   :offset-date-time t/offset-date-time?
+   :zoned-date-time t/zoned-date-time?
+   :instant t/instant?})
+
 (def parse-fn-table
   {:year (fn [s formatter]
            (if (formatter? formatter)
@@ -59,7 +69,8 @@
 (def time-encoder
   {:compile
    (fn [schema _]
-     (let [default (get default-format (m/type schema))
+     (let [o-type (m/type schema)
+           default (get default-format o-type)
            {:keys [malli/format]
             :or {format default}} (m/properties schema)
            formatter (if (formatter? format)
@@ -67,7 +78,10 @@
                        (t/formatter format))]
        {:enter (fn [obj]
                  (if (m/validate schema obj)
-                   (t/format formatter obj)
+                   (if (and (= o-type :instant)
+                            (not= format :iso-instant))
+                     (t/format formatter (t/zoned-date-time obj))
+                     (t/format formatter obj))
                    obj))}))})
 
 (def time-decoder
@@ -97,20 +111,7 @@
       :time time-encoder
       :offset-date-time time-encoder
       :zoned-date-time time-encoder
-      :instant {:compile
-                (fn [schema _]
-                  (let [default (get default-format (m/type schema))
-                        {:keys [malli/format]
-                         :or {format default}} (m/properties schema)
-                        formatter (if (formatter? format)
-                                    format
-                                    (t/formatter format))]
-                    {:enter (fn [obj]
-                              (if (m/validate schema obj)
-                                (if (= format :iso-instant)
-                                  (t/format formatter obj)
-                                  (t/format formatter (t/zoned-date-time obj)))
-                                obj))}))}}
+      :instant time-encoder}
      :decoders
      {:year time-decoder
       :year-month time-decoder
@@ -122,24 +123,24 @@
       :instant time-decoder}}))
 
 (defn ->time-schema
-  [v pred]
-  (let [v-type (keyword (name v))]
+  [v-type]
+  (let [parse (get parse-fn-table v-type)]
     (m/-simple-schema
-      {:pred pred
+      {:pred (get pred-table v-type)
        :type v-type
        :type-properties {:encode/string #(str %)
-                         :decode/string #((get parse-fn-table v-type) % nil)
+                         :decode/string #(parse % nil)
                          :encode/json #(str %)
-                         :decode/json #((get parse-fn-table v-type) % nil)}})))
+                         :decode/json #(parse % nil)}})))
 
-(def year (->time-schema 'year t/year?))
-(def year-month (->time-schema 'year-month t/year-month?))
-(def date (->time-schema 'date t/date?))
-(def date-time (->time-schema 'date-time t/date-time?))
-(def time (->time-schema 'time t/time?))
-(def offset-date-time (->time-schema 'offset-date-time t/offset-date-time?))
-(def zoned-date-time (->time-schema 'zoned-date-time t/zoned-date-time?))
-(def instant (->time-schema 'instant t/instant?))
+(def year (->time-schema :year))
+(def year-month (->time-schema :year-month))
+(def date (->time-schema :date))
+(def date-time (->time-schema :date-time))
+(def time (->time-schema :time))
+(def offset-date-time (->time-schema :offset-date-time))
+(def zoned-date-time (->time-schema :zoned-date-time))
+(def instant (->time-schema :instant))
 
 (def time-schemas
   {:date date,
