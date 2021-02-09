@@ -11,3 +11,4 @@
 .hg/
 /.idea
 *.iml
+/.rebel_readline_history

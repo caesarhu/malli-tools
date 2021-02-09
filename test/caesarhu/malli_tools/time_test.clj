@@ -56,7 +56,7 @@
         zoned-date-time (jt/zoned-date-time clock))
       (are [schema value]
         (= "1999" (m/encode (vector schema {format-key "yyyy"}) value time-transformer))
-        ;instant (jt/instant clock)
+        instant (jt/instant clock)
         date (jt/local-date clock)
         year-month (jt/year-month clock)
         year (jt/year clock)))

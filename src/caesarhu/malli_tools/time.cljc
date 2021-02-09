@@ -2,10 +2,11 @@
   (:refer-clojure :exclude [time])
   (:require [malli.core :as m]
             [malli.transform :as mt]
-            [tick.alpha.api :as t])
-  (:import (java.time Instant OffsetDateTime LocalDateTime ZonedDateTime LocalDate OffsetTime LocalTime YearMonth Year ZoneId)
-           (java.util Date Locale)
-           (java.time.format DateTimeFormatter)))
+            [tick.alpha.api :as t]
+            #?(:cljs [java.time.format :refer [DateTimeFormatter]]))
+  #?(:clj
+     (:import [java.time.format DateTimeFormatter]
+              [java.util Locale])))
 
 (def format-key :malli/format)
 
