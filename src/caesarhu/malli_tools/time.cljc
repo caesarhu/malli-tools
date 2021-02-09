@@ -78,10 +78,7 @@
                        (t/formatter format))]
        {:enter (fn [obj]
                  (if (m/validate schema obj)
-                   (if (and (= o-type :instant)
-                            (not= format :iso-instant))
-                     (t/format formatter (t/zoned-date-time obj))
-                     (t/format formatter obj))
+                   (t/format formatter obj)
                    obj))}))})
 
 (def time-decoder
